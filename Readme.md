@@ -1,5 +1,7 @@
 # Project Setup and Guide
 
+🔗 **Live demo:** [Chat with Ruby](https://hemanth145-chat-streamlit-appapp-nbdvbl.streamlit.app) — a hosted version of this chatbot (Streamlit + Groq), no local setup required. Source in [`streamlit_app/`](./streamlit_app).
+
 This README covers how to set up your Python virtual environment, install dependencies, select the correct Jupyter kernel, and configure a custom persona for a `gemma4:e2b` chat assistant running in a persistent loop.
 
 ---
