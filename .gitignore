@@ -3,3 +3,7 @@
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+
+# vendor-voice-agent
+vendor-voice-agent/.env
+vendor-voice-agent/*.db
