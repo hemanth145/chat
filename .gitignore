@@ -1,5 +1,6 @@
 .venv/
-.claude/
+.claude/*
+!.claude/settings.json
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
