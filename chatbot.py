@@ -9,6 +9,9 @@ from langchain_core.messages import HumanMessage, AIMessage
 
 llm = ChatOllama(model="gemma3:1b", num_predict=50, temperature=0.7) 
 
+# Set to True to send past turns to the model so it remembers the conversation
+USE_MEMORY = False
+
 prompt_template = ChatPromptTemplate.from_messages([
     ("system", "You are a helpful, concise, and witty CLI assistant. Your name is Ruby"),
     MessagesPlaceholder(variable_name="chat_history"),
@@ -47,20 +50,24 @@ async def main():
         full_response = ""
         
         # 4. Use astream to process the input concurrently
-        async for chunk in chain.astream({
-            "user_input": user_input,
-            "chat_history": [] #remove empty array and pass chat_history to see conversational memory
-        }):
-            # Handle both string chunks (Ollama LLM) and message chunks (ChatOllama)
-            content = chunk.content if hasattr(chunk, 'content') else chunk
-            
-            # Print the token immediately without buffering
-            print(content, end="", flush=True)
-            full_response += content
+        try:
+            async for chunk in chain.astream({
+                "user_input": user_input,
+                "chat_history": chat_history if USE_MEMORY else []
+            }):
+                # Handle both string chunks (Ollama LLM) and message chunks (ChatOllama)
+                content = chunk.content if hasattr(chunk, 'content') else chunk
+                
+                # Print the token immediately without buffering
+                print(content, end="", flush=True)
+                full_response += content
+        except Exception as e:
+            print(f"\n⚠️ Error talking to Ollama (is `ollama serve` running and `gemma3:1b` pulled?): {e}")
+            continue
             
         print() # Print a final newline after the full stream finishes
         
-        # 5. Update history with both turns so the model remembers next time
+        # 5. Update history with both turns (sent to the model when USE_MEMORY is True)
         chat_history.append(HumanMessage(content=user_input))
         chat_history.append(AIMessage(content=full_response))
 
