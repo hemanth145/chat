@@ -1,11 +1,12 @@
 import asyncio
 import sys
 
+# Must run before anything prints so emoji output works on Windows consoles
 sys.stdout.reconfigure(encoding="utf-8")
 
-from langchain_ollama import ChatOllama
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_ollama import ChatOllama  # noqa: E402
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder  # noqa: E402
+from langchain_core.messages import HumanMessage, AIMessage  # noqa: E402
 
 llm = ChatOllama(model="gemma3:1b", num_predict=50, temperature=0.7) 
 
@@ -18,7 +19,7 @@ prompt_template = ChatPromptTemplate.from_messages([
     ("human", "{user_input}")
 ])
 
-# 3. Create the LangChain Runnable Sequence (Chain)
+# Create the LangChain Runnable Sequence (Chain)
 chain = prompt_template | llm
 
 async def main():
@@ -49,15 +50,13 @@ async def main():
         # Track the streaming response tokens to rebuild the full text later
         full_response = ""
         
-        # 4. Use astream to process the input concurrently
+        # Stream the reply token by token as it is generated
         try:
             async for chunk in chain.astream({
                 "user_input": user_input,
                 "chat_history": chat_history if USE_MEMORY else []
             }):
-                # Handle both string chunks (Ollama LLM) and message chunks (ChatOllama)
-                content = chunk.content if hasattr(chunk, 'content') else chunk
-                
+                content = chunk.content
                 # Print the token immediately without buffering
                 print(content, end="", flush=True)
                 full_response += content
@@ -67,7 +66,7 @@ async def main():
             
         print() # Print a final newline after the full stream finishes
         
-        # 5. Update history with both turns (sent to the model when USE_MEMORY is True)
+        # Update history with both turns (sent to the model when USE_MEMORY is True)
         chat_history.append(HumanMessage(content=user_input))
         chat_history.append(AIMessage(content=full_response))
 
